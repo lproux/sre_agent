@@ -22,7 +22,7 @@
 ### Act 1: Set the Scene (2 min)
 
 **What to say:**
-> "Let me show you Azure SRE Agent in action. We have a document processing application running on Azure App Service — think of it as a simplified version of a platform like YooZ that processes invoices, receipts, and purchase orders."
+> "Let me show you Azure SRE Agent in action. We have a document processing application running on Azure App Service — it processes invoices, receipts, and purchase orders."
 
 **What to show:**
 - App Service overview in portal (resource group view)

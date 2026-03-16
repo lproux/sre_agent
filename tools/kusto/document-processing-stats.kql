@@ -1,6 +1,6 @@
 # Tool: DocumentProcessingStats
 # Description: Query custom events to analyze document processing success and
-#   failure rates. Specific to the YooZ document processing demo application.
+#   failure rates. Specific to the document processing demo application.
 #   Use when asked about document processing performance, throughput, or failures.
 # Connector: Application Insights (ai-sre-demo)
 # Parameters:

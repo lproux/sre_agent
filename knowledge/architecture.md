@@ -1,6 +1,6 @@
-# Application Architecture — YooZ Document Processing Platform
+# Application Architecture — Document Processing Platform
 
-> **Owner:** SRE Team — ITESOFT
+> **Owner:** SRE Team
 > **Last updated:** 2026-03-10
 > **Classification:** Internal — Engineering
 > **Review cadence:** Quarterly or after any significant infrastructure change
@@ -9,14 +9,14 @@
 
 ## Overview
 
-YooZ is a document processing SaaS platform purpose-built for accounts payable automation. It handles invoice capture, OCR-based field extraction, validation, and multi-step approval workflows for enterprise customers.
+This is a document processing SaaS platform purpose-built for accounts payable automation. It handles invoice capture, OCR-based field extraction, validation, and multi-step approval workflows for enterprise customers.
 
 | Attribute | Value |
 |---|---|
 | **Runtime** | Azure App Service (Linux, Node.js 20 LTS) |
 | **Primary region** | Sweden Central (`swedencentral`) |
 | **Secondary region** | None — this is a demo/staging environment |
-| **Customer base** | ITESOFT customers across EMEA |
+| **Customer base** | Enterprise customers across EMEA |
 | **Deployment model** | Single-tenant App Service Plan, continuous deployment from GitHub Actions |
 | **SLA target** | 99.5% availability (demo tier — production target is 99.95%) |
 
