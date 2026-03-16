@@ -12,11 +12,13 @@ if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
     .start();
 }
 
+const path = require("path");
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
 // ---------- helpers ----------
 
@@ -34,21 +36,9 @@ function simulateCpuLoad(durationMs) {
 
 // ---------- routes ----------
 
-// Landing page
+// Landing page — serve the dashboard HTML
 app.get("/", (_req, res) => {
-  const healthy = isHealthy();
-  res.status(200).json({
-    service: "YooZ Document Processing Platform (Demo)",
-    version: "1.0.0",
-    status: healthy ? "operational" : "degraded",
-    endpoints: [
-      "GET  /health",
-      "GET  /api/status",
-      "POST /api/process",
-      "GET  /api/documents",
-      "GET  /api/documents/:id",
-    ],
-  });
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // Health probe (App Service uses this)

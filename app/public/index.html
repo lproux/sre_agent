@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YooZ Document Processing Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --border-color: #30363d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --accent: #58a6ff;
+    --accent-glow: rgba(88, 166, 255, 0.15);
+    --green: #3fb950;
+    --green-glow: rgba(63, 185, 80, 0.2);
+    --red: #f85149;
+    --red-glow: rgba(248, 81, 73, 0.2);
+    --cyan: #79c0ff;
+    --yellow: #d29922;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+  }
+
+  /* Degraded banner */
+  .degraded-banner {
+    display: none;
+    background: linear-gradient(90deg, #5a1d1d, #6e2020, #5a1d1d);
+    border-bottom: 1px solid var(--red);
+    padding: 10px 24px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+    color: #ffa198;
+    letter-spacing: 0.5px;
+    animation: bannerPulse 3s ease-in-out infinite;
+  }
+  .degraded-banner .icon { margin-right: 8px; }
+  body.unhealthy .degraded-banner { display: block; }
+
+  @keyframes bannerPulse {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+
+  /* Header */
+  header {
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+  }
+  header .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .brand .subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .health-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 18px;
+  }
+  .health-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green-glow);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .health-dot.healthy {
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green-glow);
+  }
+  .health-dot.unhealthy {
+    background: var(--red);
+    box-shadow: 0 0 12px var(--red-glow);
+    animation: dotPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%, 100% { box-shadow: 0 0 6px var(--red-glow); }
+    50% { box-shadow: 0 0 18px var(--red), 0 0 30px var(--red-glow); }
+  }
+  .health-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .health-label.healthy { color: var(--green); }
+  .health-label.unhealthy { color: var(--red); }
+
+  /* Accent override when unhealthy */
+  body.unhealthy { --accent: var(--red); --accent-glow: var(--red-glow); }
+
+  /* Main content */
+  main {
+    flex: 1;
+    padding: 32px 40px;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Metric cards */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .metric-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .metric-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent-glow);
+  }
+  .metric-card .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .metric-card .value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .metric-card .detail {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* Sections */
+  .section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-header .icon {
+    color: var(--accent);
+    font-size: 15px;
+  }
+
+  /* Endpoints table */
+  .endpoints-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .endpoints-table tr { border-bottom: 1px solid var(--border-color); }
+  .endpoints-table tr:last-child { border-bottom: none; }
+  .endpoints-table td { padding: 12px 20px; font-size: 13px; vertical-align: middle; }
+  .endpoints-table .method {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 48px;
+    text-align: center;
+  }
+  .method.get { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+  .method.post { background: rgba(88, 166, 255, 0.15); color: var(--accent); }
+  .endpoint-path {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    color: var(--cyan);
+    font-size: 13px;
+  }
+  .endpoint-desc { color: var(--text-secondary); font-size: 13px; }
+
+  /* Test section */
+  .test-area { padding: 24px 20px; }
+  .test-btn {
+    background: linear-gradient(135deg, #1f6feb, #388bfd);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+  }
+  .test-btn:hover { background: linear-gradient(135deg, #388bfd, #58a6ff); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(56, 139, 253, 0.3); }
+  .test-btn:active { transform: translateY(0); }
+  .test-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  body.unhealthy .test-btn {
+    background: linear-gradient(135deg, #8b2020, #a83232);
+  }
+  body.unhealthy .test-btn:hover {
+    background: linear-gradient(135deg, #a83232, #c74040);
+    box-shadow: 0 4px 16px rgba(248, 81, 73, 0.3);
+  }
+
+  .test-result {
+    margin-top: 16px;
+    display: none;
+  }
+  .test-result.visible { display: block; }
+  .test-result pre {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 12px;
+    color: var(--cyan);
+    overflow-x: auto;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .test-result .result-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  /* Footer status bar */
+  footer {
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  footer .status-line {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  footer .separator {
+    width: 1px;
+    height: 14px;
+    background: var(--border-color);
+  }
+  .response-time { font-variant-numeric: tabular-nums; }
+  .response-time.fast { color: var(--green); }
+  .response-time.slow { color: var(--yellow); }
+  .response-time.error { color: var(--red); }
+
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, #2a313a 50%, var(--bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+    display: inline-block;
+    height: 1.2em;
+    width: 80px;
+    vertical-align: middle;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    header, main, footer { padding-left: 20px; padding-right: 20px; }
+    .brand h1 { font-size: 18px; }
+    .metric-card .value { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="degraded-banner">
+  <span class="icon">&#9888;</span>SERVICE DEGRADED &mdash; Document processing engine failure
+</div>
+
+<header>
+  <div class="top-row">
+    <div class="brand">
+      <h1>YooZ Document Processing Platform</h1>
+      <div class="subtitle">(Demo Environment)</div>
+    </div>
+    <div class="health-badge">
+      <div class="health-dot healthy" id="healthDot"></div>
+      <span class="health-label healthy" id="healthLabel">Checking&hellip;</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="label">Uptime</div>
+      <div class="value" id="metricUptime"><span class="skeleton"></span></div>
+      <div class="detail" id="metricUptimeDetail">since last restart</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Memory Usage</div>
+      <div class="value" id="metricMemory"><span class="skeleton"></span></div>
+      <div class="detail" id="metricMemoryDetail">heap used / total</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Node Version</div>
+      <div class="value" id="metricNode"><span class="skeleton"></span></div>
+      <div class="detail">runtime engine</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Status</div>
+      <div class="value" id="metricStatus"><span class="skeleton"></span></div>
+      <div class="detail" id="metricStatusDetail">service state</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="icon">&#9670;</span> API Endpoints</div>
+    <table class="endpoints-table">
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td class="endpoint-path">/health</td>
+        <td class="endpoint-desc">Health check &mdash; returns service status and system info</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td class="endpoint-path">/api/status</td>
+        <td class="endpoint-desc">Detailed status with uptime, memory, and configuration</td>
+      </tr>
+      <tr>
+        <td><span class="method post">POST</span></td>
+        <td class="endpoint-path">/api/process</td>
+        <td class="endpoint-desc">Submit a document for processing (invoice extraction)</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td class="endpoint-path">/api/documents</td>
+        <td class="endpoint-desc">List all processed documents</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td class="endpoint-path">/api/documents/:id</td>
+        <td class="endpoint-desc">Retrieve a specific processed document by ID</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="icon">&#9654;</span> Test Document Processing</div>
+    <div class="test-area">
+      <button class="test-btn" id="testBtn" onclick="testProcess()">Test Document Processing</button>
+      <div class="test-result" id="testResult">
+        <div class="result-label">Response</div>
+        <pre id="testOutput"></pre>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="status-line">
+    <span id="lastCheckTime">Waiting for first check&hellip;</span>
+    <div class="separator"></div>
+    <span class="response-time" id="responseTime">&mdash;</span>
+  </div>
+  <span>Auto-refresh: 5s</span>
+</footer>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  let healthy = true;
+
+  function formatUptime(seconds) {
+    if (seconds == null) return '--';
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    const parts = [];
+    if (d > 0) parts.push(d + 'd');
+    if (h > 0) parts.push(h + 'h');
+    if (m > 0) parts.push(m + 'm');
+    parts.push(s + 's');
+    return parts.join(' ');
+  }
+
+  function formatBytes(bytes) {
+    if (bytes == null) return '--';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function setHealthy(isHealthy) {
+    healthy = isHealthy;
+    const dot = $('healthDot');
+    const label = $('healthLabel');
+    const body = document.body;
+
+    dot.className = 'health-dot ' + (isHealthy ? 'healthy' : 'unhealthy');
+    label.className = 'health-label ' + (isHealthy ? 'healthy' : 'unhealthy');
+    label.textContent = isHealthy ? 'Healthy' : 'Unhealthy';
+
+    if (isHealthy) {
+      body.classList.remove('unhealthy');
+    } else {
+      body.classList.add('unhealthy');
+    }
+  }
+
+  function setMetric(id, value) {
+    const el = $(id);
+    if (el) el.textContent = value;
+  }
+
+  async function fetchStatus() {
+    const start = performance.now();
+    let statusOk = false;
+    let healthOk = false;
+
+    // Fetch /api/status
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      statusOk = res.ok;
+
+      setMetric('metricUptime', formatUptime(data.uptime));
+      setMetric('metricUptimeDetail', data.startedAt ? 'since ' + new Date(data.startedAt).toLocaleTimeString() : 'since last restart');
+
+      if (data.memory) {
+        const heapUsed = data.memory.heapUsed || data.memory.heap_used;
+        const heapTotal = data.memory.heapTotal || data.memory.heap_total;
+        const rss = data.memory.rss;
+        setMetric('metricMemory', formatBytes(heapUsed || rss));
+        if (heapUsed && heapTotal) {
+          setMetric('metricMemoryDetail', formatBytes(heapUsed) + ' / ' + formatBytes(heapTotal));
+        }
+      } else {
+        setMetric('metricMemory', '--');
+      }
+
+      setMetric('metricNode', data.nodeVersion || data.node || '--');
+      setMetric('metricStatus', data.status || (statusOk ? 'OK' : 'Error'));
+    } catch (e) {
+      setMetric('metricUptime', '--');
+      setMetric('metricMemory', '--');
+      setMetric('metricNode', '--');
+      setMetric('metricStatus', 'Unreachable');
+    }
+
+    // Fetch /health
+    try {
+      const hres = await fetch('/health');
+      const hdata = await hres.json();
+      healthOk = hres.ok && (hdata.status === 'healthy' || hdata.status === 'ok' || hdata.healthy === true);
+    } catch (e) {
+      healthOk = false;
+    }
+
+    const elapsed = Math.round(performance.now() - start);
+    setHealthy(healthOk);
+
+    if (!healthOk) {
+      setMetric('metricStatus', 'Degraded');
+      $('metricStatusDetail').textContent = 'service unhealthy';
+    } else {
+      $('metricStatusDetail').textContent = 'service state';
+    }
+
+    // Footer
+    const now = new Date();
+    $('lastCheckTime').textContent = 'Last check: ' + now.toLocaleTimeString();
+    const rt = $('responseTime');
+    rt.textContent = elapsed + ' ms';
+    rt.className = 'response-time ' + (elapsed < 200 ? 'fast' : elapsed < 1000 ? 'slow' : 'error');
+  }
+
+  window.testProcess = async function () {
+    const btn = $('testBtn');
+    const resultBox = $('testResult');
+    const output = $('testOutput');
+
+    btn.disabled = true;
+    btn.textContent = 'Processing\u2026';
+    resultBox.classList.add('visible');
+    output.textContent = 'Sending request to /api/process\u2026';
+
+    try {
+      const start = performance.now();
+      const res = await fetch('/api/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          document: {
+            type: 'invoice',
+            filename: 'sample-invoice-demo.pdf',
+            source: 'dashboard-test'
+          }
+        })
+      });
+      const elapsed = Math.round(performance.now() - start);
+      const data = await res.json();
+      output.textContent = '// Status: ' + res.status + ' | ' + elapsed + ' ms\n' + JSON.stringify(data, null, 2);
+    } catch (e) {
+      output.textContent = '// Error\n' + e.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Test Document Processing';
+  };
+
+  // Initial fetch and interval
+  fetchStatus();
+  setInterval(fetchStatus, 5000);
+})();
+</script>
+
+</body>
+</html>
