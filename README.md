@@ -181,9 +181,7 @@ $ curl -s https://app-sre-demo-a1b2c3.azurewebsites.net/health | jq
 
 Open the app URL in a browser to see the live dashboard:
 
-<!-- Replace with actual screenshot after first deployment -->
-![App Dashboard](docs/images/11-app-healthy.png)
-*The dashboard auto-refreshes every 5 seconds and shows real-time health status*
+> **Dashboard**: Open the app URL in a browser to see the dark-themed live dashboard with health status, metrics, API docs, and a "Test Document Processing" button. It auto-refreshes every 5 seconds.
 
 ### Step 3: Create SRE Agent in Portal
 
@@ -250,9 +248,7 @@ $ ./break-app.sh
 
 The dashboard immediately turns red:
 
-<!-- Replace with actual screenshot -->
-![App Broken](docs/images/12-app-broken.png)
-*Dashboard showing degraded state with red health indicator and warning banner*
+> **Dashboard turns red**: The health indicator pulses red, a warning banner appears ("SERVICE DEGRADED"), and the accent color shifts from blue to red across the entire UI.
 
 Verify from the terminal:
 
@@ -276,20 +272,13 @@ HTTP 500 - 1.247s
 - **Azure Monitor > Alerts** — Alert rules transitioning to "Fired" state
 - **Application Insights > Failures** — Exception drilldown showing stack traces
 
-<!-- Replace with actual screenshots -->
-![Alerts Firing](docs/images/08-alert-firing.png)
-*Azure Monitor alerts in fired state*
-
-![Failure Analysis](docs/images/14-failure-analysis.png)
-*Application Insights failure analysis showing exception patterns*
+> **In the portal**: Azure Monitor Alerts show "Fired" state. Application Insights Failures blade shows exception drilldowns with stack traces.
 
 ### SRE Agent Investigates
 
 Within 1-2 minutes of alerts firing, SRE Agent detects the incident and starts investigating:
 
-<!-- Replace with actual screenshots -->
-![SRE Agent Investigation](docs/images/09-sre-agent-investigation.png)
-*SRE Agent autonomously investigating the incident*
+> **SRE Agent dashboard**: The agent opens an investigation thread, queries Application Insights for exceptions, checks the Activity Log for recent changes, and correlates evidence.
 
 **What SRE Agent does:**
 1. Detects the fired Azure Monitor alerts
@@ -298,8 +287,7 @@ Within 1-2 minutes of alerts firing, SRE Agent detects the incident and starts i
 4. Checks resource health and configuration
 5. Produces a structured Root Cause Analysis
 
-![SRE Agent RCA](docs/images/10-sre-agent-rca.png)
-*SRE Agent root cause analysis output*
+> **RCA output**: The agent produces a structured root cause analysis identifying the `APP_HEALTHY` config change, with evidence timestamps and a recommended fix.
 
 ### During the Demo — Fix It
 
@@ -452,8 +440,7 @@ Deletes the entire resource group (with confirmation prompt). Resource group del
 3. Search for **"SRE Agent"**
 4. Click **Create**
 
-<!-- Replace with actual screenshot -->
-![Create SRE Agent](docs/images/05-sre-agent-create.png)
+> Go to [sre.azure.com](https://sre.azure.com), sign in, and click **Create agent**.
 
 ### Step 2: Configure
 
@@ -470,8 +457,7 @@ Deletes the entire resource group (with confirmation prompt). Resource group del
 
 After creation (~2-3 minutes), open the SRE Agent resource to see the dashboard:
 
-<!-- Replace with actual screenshot -->
-![SRE Agent Dashboard](docs/images/06-sre-agent-dashboard.png)
+> The agent dashboard shows monitored resource groups, resource inventory, and a chat interface.
 
 The agent uses **On-Behalf-Of (OBO) flow** — it acts with the permissions of the user who created it (Reader in our case), so it can investigate but not modify resources.
 
@@ -545,27 +531,50 @@ az monitor app-insights metrics show \
 ```
 sre_agent/
 ├── README.md                  # This file
-├── DEMO-GUIDE.md              # Detailed presenter script
-├── .gitignore                 # Excludes .env, node_modules
+├── DEMO-GUIDE.md              # Presenter script (Level 100/200)
+├── FULL-DEMO-PLAYBOOK.md      # Complete 1400-line playbook
+├── .gitignore
 │
 ├── app/                       # Node.js demo application
-│   ├── package.json           # Dependencies (express, applicationinsights)
+│   ├── package.json
 │   ├── server.js              # Express app with 6 endpoints + failure mode
-│   ├── web.config              # IIS node handler config
-│   ├── .deployment            # Azure deployment config
+│   ├── web.config
+│   ├── .deployment
 │   └── public/
-│       └── index.html         # Live dashboard UI
+│       └── index.html         # Live dashboard UI (dark theme)
+│
+├── knowledge/                 # Upload to SRE Agent knowledge base
+│   ├── architecture.md        # System architecture & request flows
+│   ├── runbooks.md            # 5 operational runbooks
+│   ├── slos.md                # SLO definitions & error budget policy
+│   ├── oncall.md              # Escalation procedures
+│   ├── known-issues.md        # Known issues with agent guidance
+│   ├── deployments.md         # Deployment procedures
+│   ├── contacts.md            # Team ownership matrix
+│   └── environment.md         # Full resource inventory
+│
+├── tools/                     # Custom tools for SRE Agent Builder
+│   ├── README.md              # Setup instructions for each tool type
+│   ├── python/                # 6 Python tools
+│   ├── kusto/                 # 5 parameterized KQL queries
+│   └── link/                  # 2 deep-link generators
+│
+├── skills/                    # Skills (procedure + tools)
+│   ├── app-service-troubleshooting/
+│   ├── incident-response/
+│   ├── performance-analysis/
+│   ├── sla-reporting/
+│   └── daily-health-check/
 │
 ├── setup-sre-demo.sh          # Provision Azure resources
 ├── generate-traffic.sh        # Pre-demo traffic generator
-├── break-app.sh               # Inject failures (APP_HEALTHY=false)
-├── fix-app.sh                 # Restore health (APP_HEALTHY=true)
+├── break-app.sh               # Inject failures
+├── fix-app.sh                 # Restore health
 ├── cleanup.sh                 # Delete all Azure resources
 │
 └── docs/
-    ├── SCREENSHOTS.md         # Guide for capturing screenshots
-    └── images/                # Screenshot storage (add after first deploy)
-        └── .gitkeep
+    ├── SCREENSHOTS.md
+    └── images/
 ```
 
 ---

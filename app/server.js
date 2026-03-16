@@ -68,10 +68,16 @@ app.get("/api/status", (_req, res) => {
     simulateCpuLoad(200); // add latency
   }
 
+  const mem = process.memoryUsage();
   res.status(200).json({
     healthy,
-    uptime: `${Math.floor(uptime)}s`,
-    memoryUsage: process.memoryUsage(),
+    status: healthy ? "operational" : "degraded",
+    uptime: Math.floor(uptime),
+    memory: {
+      rss: mem.rss,
+      heapUsed: mem.heapUsed,
+      heapTotal: mem.heapTotal,
+    },
     nodeVersion: process.version,
     environment: process.env.NODE_ENV || "production",
     timestamp: new Date().toISOString(),
