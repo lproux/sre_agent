@@ -1,0 +1,9 @@
+name: sla-reporting
+description: Use when generating SLA reports, checking compliance, calculating error budgets, or answering questions about uptime and availability targets.
+files:
+  - SKILL.md
+tools:
+  - CalculateSLA
+  - AvailabilityTimeline
+  - ErrorRateByEndpoint
+  - DocumentProcessingStats

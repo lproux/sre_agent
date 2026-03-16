@@ -1,0 +1,12 @@
+name: incident-response
+description: Use when handling any production incident, alert investigation, or when alerts are firing. Provides a structured incident response workflow.
+files:
+  - SKILL.md
+tools:
+  - RunAzCliReadCommands
+  - QueryTopExceptions
+  - ErrorRateByEndpoint
+  - RecentConfigChanges
+  - AvailabilityTimeline
+  - CheckAppHealth
+  - MapDependencies

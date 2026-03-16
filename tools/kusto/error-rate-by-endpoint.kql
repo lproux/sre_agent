@@ -1,0 +1,19 @@
+# Tool: ErrorRateByEndpoint
+# Description: Calculate error rates per API endpoint for the specified time range.
+#   Use when investigating which endpoints are failing, for performance analysis,
+#   or to understand the blast radius of an incident.
+# Connector: Application Insights (ai-sre-demo)
+# Parameters:
+#   - timeRange (string): How far back to look (e.g. 1h, 6h, 24h)
+
+requests
+| where timestamp > ago(##timeRange##)
+| summarize
+    total_requests = count(),
+    failed_requests = countif(toint(resultCode) >= 500),
+    avg_duration_ms = round(avg(duration), 1),
+    p95_duration_ms = round(percentile(duration, 95), 1),
+    p99_duration_ms = round(percentile(duration, 99), 1)
+  by name, resultCode
+| extend error_rate_pct = round(todouble(failed_requests) / todouble(total_requests) * 100, 2)
+| order by failed_requests desc, total_requests desc

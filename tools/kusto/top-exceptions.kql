@@ -1,0 +1,17 @@
+# Tool: QueryTopExceptions
+# Description: Query Application Insights for the top exceptions in the specified time range.
+#   Use when investigating errors, exceptions, failures, or HTTP 5xx issues.
+# Connector: Application Insights (ai-sre-demo)
+# Parameters:
+#   - timeRange (string): How far back to look (e.g. 1h, 24h, 7d)
+#   - limit (int): Max results to return (default: 10)
+
+exceptions
+| where timestamp > ago(##timeRange##)
+| summarize
+    count() as occurrence_count,
+    latest_timestamp = max(timestamp),
+    earliest_timestamp = min(timestamp)
+  by type, outerMessage, problemId
+| order by occurrence_count desc
+| take ##limit##

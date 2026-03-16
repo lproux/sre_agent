@@ -1,0 +1,10 @@
+name: app-service-troubleshooting
+description: Use when investigating App Service issues including HTTP errors, health check failures, high latency, deployment problems, or configuration issues.
+files:
+  - SKILL.md
+tools:
+  - RunAzCliReadCommands
+  - QueryTopExceptions
+  - ErrorRateByEndpoint
+  - RecentConfigChanges
+  - CheckAppHealth

@@ -1,0 +1,23 @@
+# Tool: RecentConfigChanges
+# Description: Query the Activity Log for recent configuration changes, deployments,
+#   and administrative operations. Essential for correlating incidents with changes.
+#   Use when investigating root causes, checking for recent deployments, or
+#   looking at what changed before an incident.
+# Connector: Log Analytics (law-sre-demo)
+# Parameters:
+#   - timeRange (string): How far back to look (e.g. 1h, 6h, 24h)
+
+AzureActivity
+| where TimeGenerated > ago(##timeRange##)
+| where CategoryValue == "Administrative"
+| where ActivityStatusValue == "Success" or ActivityStatusValue == "Succeeded"
+| project
+    TimeGenerated,
+    OperationNameValue,
+    CallerIpAddress,
+    Caller,
+    ResourceGroup,
+    Resource,
+    ActivityStatusValue
+| order by TimeGenerated desc
+| take 25

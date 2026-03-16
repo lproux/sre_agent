@@ -1,0 +1,18 @@
+# Tool: DocumentProcessingStats
+# Description: Query custom events to analyze document processing success and
+#   failure rates. Specific to the YooZ document processing demo application.
+#   Use when asked about document processing performance, throughput, or failures.
+# Connector: Application Insights (ai-sre-demo)
+# Parameters:
+#   - timeRange (string): How far back to look (e.g. 1h, 6h, 24h)
+
+customEvents
+| where timestamp > ago(##timeRange##)
+| where name in ("DocumentProcessed", "DocumentProcessingFailed")
+| summarize
+    total = count(),
+    succeeded = countif(name == "DocumentProcessed"),
+    failed = countif(name == "DocumentProcessingFailed")
+  by bin(timestamp, 5m)
+| extend success_rate_pct = round(todouble(succeeded) / todouble(total) * 100, 2)
+| order by timestamp desc

@@ -1,0 +1,10 @@
+name: performance-analysis
+description: Use when analyzing application performance, baselining response times, investigating latency issues, or generating performance reports.
+files:
+  - SKILL.md
+tools:
+  - AnalyzeResponseTimes
+  - ErrorRateByEndpoint
+  - AvailabilityTimeline
+  - CheckAppHealth
+  - EstimateResourceCost

@@ -1,0 +1,26 @@
+# Tool: OpenGrafanaDashboard
+# Description: Generate a deep link to the Grafana monitoring dashboard for
+#   the specified resource and time range. Opens directly to the relevant view.
+#   Use when asked to show a Grafana dashboard, visualize metrics, or share
+#   a monitoring link.
+#
+# Parameters:
+#   - dashboard_id (string): The Grafana dashboard ID (e.g. "api-latency", "app-overview")
+#   - time_from (string): Start time (e.g. "now-1h", "now-6h", "now-24h")
+#   - time_to (string): End time (e.g. "now")
+
+name: OpenGrafanaDashboard
+description: Generate a deep link to the Grafana monitoring dashboard
+url_template: "https://grafana.internal/d/##dashboard_id##?orgId=1&from=##time_from##&to=##time_to##&var-resource_group=rg-sre-agent-demo"
+parameters:
+  - name: dashboard_id
+    type: string
+    description: "Dashboard ID (e.g. api-latency, app-overview, error-rates)"
+  - name: time_from
+    type: string
+    description: "Start time (e.g. now-1h, now-6h, now-24h)"
+    default: "now-1h"
+  - name: time_to
+    type: string
+    description: "End time (e.g. now)"
+    default: "now"

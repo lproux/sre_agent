@@ -1,0 +1,9 @@
+name: daily-health-check
+description: Use for routine daily health checks, proactive monitoring, or as a scheduled task to verify environment health.
+files:
+  - SKILL.md
+tools:
+  - CheckAppHealth
+  - RunAzCliReadCommands
+  - AnalyzeResponseTimes
+  - ErrorRateByEndpoint

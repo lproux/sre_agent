@@ -1,0 +1,19 @@
+# Tool: AvailabilityTimeline
+# Description: Generate a time-bucketed view of application availability showing
+#   request counts, error counts, and availability percentage per time window.
+#   Use for SLA reporting, availability analysis, or incident timeline reconstruction.
+# Connector: Application Insights (ai-sre-demo)
+# Parameters:
+#   - timeRange (string): How far back to look (e.g. 1h, 6h, 24h)
+#   - bucketSize (string): Time bucket size (e.g. 5m, 15m, 1h)
+
+requests
+| where timestamp > ago(##timeRange##)
+| summarize
+    total = count(),
+    successful = countif(toint(resultCode) < 500),
+    failed = countif(toint(resultCode) >= 500),
+    avg_duration_ms = round(avg(duration), 1)
+  by bin(timestamp, ##bucketSize##)
+| extend availability_pct = round(todouble(successful) / todouble(total) * 100, 2)
+| order by timestamp asc

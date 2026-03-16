@@ -1,0 +1,23 @@
+# Tool: OpenPortalBlade
+# Description: Generate deep links to specific Azure Portal blades for the demo
+#   resources. Saves time navigating the portal during investigations.
+#   Use when asked to open the portal, view a specific resource, or share a link.
+#
+# Parameters:
+#   - blade (string): Which blade to open (app-insights-failures, app-insights-performance,
+#     app-insights-live-metrics, app-service-overview, alerts, activity-log)
+
+name: OpenPortalBlade
+description: Generate a deep link to a specific Azure Portal blade for demo resources
+url_templates:
+  app-insights-failures: "https://portal.azure.com/#@2b9d9f47-1fb6-400a-a438-39fe7d768649/blade/Microsoft_Azure_MonitoringMetrics/Failures.ReactView/resourceId/%2Fsubscriptions%2Fd334f2cd-3efd-494e-9fd3-2470b1a13e4c%2FresourceGroups%2Frg-sre-agent-demo%2Fproviders%2Fmicrosoft.insights%2Fcomponents%2Fai-sre-demo"
+  app-insights-performance: "https://portal.azure.com/#@2b9d9f47-1fb6-400a-a438-39fe7d768649/blade/Microsoft_Azure_MonitoringMetrics/Performance.ReactView/resourceId/%2Fsubscriptions%2Fd334f2cd-3efd-494e-9fd3-2470b1a13e4c%2FresourceGroups%2Frg-sre-agent-demo%2Fproviders%2Fmicrosoft.insights%2Fcomponents%2Fai-sre-demo"
+  app-insights-live-metrics: "https://portal.azure.com/#@2b9d9f47-1fb6-400a-a438-39fe7d768649/blade/Microsoft_Azure_MonitoringMetrics/LiveStream.ReactView/resourceId/%2Fsubscriptions%2Fd334f2cd-3efd-494e-9fd3-2470b1a13e4c%2FresourceGroups%2Frg-sre-agent-demo%2Fproviders%2Fmicrosoft.insights%2Fcomponents%2Fai-sre-demo"
+  app-service-overview: "https://portal.azure.com/#@2b9d9f47-1fb6-400a-a438-39fe7d768649/resource/subscriptions/d334f2cd-3efd-494e-9fd3-2470b1a13e4c/resourceGroups/rg-sre-agent-demo/providers/Microsoft.Web/sites/app-sre-demo-176aec/appServices"
+  alerts: "https://portal.azure.com/#@2b9d9f47-1fb6-400a-a438-39fe7d768649/blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/alertsV2"
+  activity-log: "https://portal.azure.com/#@2b9d9f47-1fb6-400a-a438-39fe7d768649/blade/Microsoft_Azure_ActivityLog/ActivityLogBlade/resourceId/%2Fsubscriptions%2Fd334f2cd-3efd-494e-9fd3-2470b1a13e4c%2FresourceGroups%2Frg-sre-agent-demo"
+parameters:
+  - name: blade
+    type: string
+    description: "Which blade to open"
+    enum: [app-insights-failures, app-insights-performance, app-insights-live-metrics, app-service-overview, alerts, activity-log]
