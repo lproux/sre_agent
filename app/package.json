@@ -1,0 +1,16 @@
+{
+  "name": "sre-agent-demo-app",
+  "version": "1.0.0",
+  "description": "Demo document processing app for Azure SRE Agent presentations",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "applicationinsights": "^2.9.5",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

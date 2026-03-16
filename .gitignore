@@ -1,0 +1,17 @@
+# Environment config (contains webapp name)
+.env
+
+# Node
+app/node_modules/
+app/package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temp
+*.zip
