@@ -27,6 +27,8 @@ az monitor metrics alert list --resource-group rg-sre-agent-demo --subscription 
 
 Confirm rule configuration and retrieve active alert instances separately when the alert-management read path is available. If alert instances cannot be queried, state that limitation rather than reporting that no alerts are firing.
 
+For Azure Alerts Management, use a currently supported API version. If the endpoint rejects a server-side `$filter`, retrieve the subscription result set and filter by the exact target resource client-side. An empty result only means that no active instances were returned by that query at that time.
+
 ## Check 4: Endpoint Performance
 
 Run `AnalyzeResponseTimes` with `num_requests=5`, or equivalent external HTTPS probes, for documented endpoints.
@@ -51,7 +53,8 @@ Expected: 0% error rate across required endpoints and no unexplained warnings or
 
 1. Inspect public TLS certificates and flag certificates expiring within 30 days.
 2. Review CPU, memory, and filesystem/storage metrics over the same 24-hour window using supported metric intervals.
-3. Report peak values and the latest non-zero samples. If metrics become zero-valued or stop arriving while the application is still serving traffic, report telemetry/process-lifecycle uncertainty; do not interpret those samples as idle capacity or recovery.
+3. For the combined App Service `CpuTime`, `AverageMemoryWorkingSet`, and `FileSystemUsage` query, use a common supported grain such as `PT6H`; use separate metric queries when a finer grain is required.
+4. Report peak values and the latest non-zero samples. If metrics become zero-valued or stop arriving while the application is still serving traffic, report telemetry/process-lifecycle uncertainty; do not interpret those samples as idle capacity or recovery.
 
 ## Check 7: Report Delivery and Change Control
 
