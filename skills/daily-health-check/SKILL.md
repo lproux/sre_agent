@@ -66,6 +66,7 @@ Expected: A current, non-empty workload signal and 0% error rate across all endp
 - Check minimum TLS version and certificate inventory for certificates expiring in the next 30 days.
 - Distinguish no certificate inventory from a certificate that is valid beyond 30 days.
 - Before delivery, inspect the configured mail connector. If it is already in an error state, make one send attempt only when required by the scheduled task, capture the error, and do not retry.
+- Send only to a configured SRE recipient or distribution list. If routing cannot be resolved from the task configuration or an authorized mailbox read, report delivery as **BLOCKED: recipient unavailable**; do not guess an address.
 
 ## Report Format
 
