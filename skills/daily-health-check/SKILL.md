@@ -55,6 +55,8 @@ Compare against baselines:
 
 Also review App Service CPU, memory, and filesystem usage. Use a supported sampling grain for each metric; `FileSystemUsage` requires a coarser interval than CPU and memory. Treat zero CPU/memory together with no requests or telemetry as a signal-quality problem, not proof of low utilization.
 
+Some metric clients default to one-minute samples, which are unsupported for every metric. If that occurs, use an explicit interval: `PT1M` for `CpuTime`, `AverageMemoryWorkingSet`, and `Http5xx`; `PT6H` for `FileSystemUsage`; and `PT5M` for `HealthCheckStatus`. An unsupported-grain error is a collection-tool limitation, not evidence that the metric is absent; reissue the same read-only query once with the documented interval.
+
 ## Check 5: Error Trends (Last 24h)
 
 Use `ErrorRateByEndpoint` with `timeRange=24h` when request telemetry is present. Otherwise, query Application Insights and Log Analytics for total records, failures, exceptions, traces, and the most recent observed timestamp.
