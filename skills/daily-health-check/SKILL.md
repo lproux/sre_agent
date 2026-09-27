@@ -55,6 +55,8 @@ For the App Service, review CPU, memory, HTTP 5xx, filesystem use, and health-ch
 - `FileSystemUsage`: `PT6H`
 - `HealthCheckStatus`: `PT5M`
 
+Query metrics with incompatible supported intervals in separate calls; Azure Monitor rejects a combined request unless all requested metrics share the same interval.
+
 Zero CPU, memory, and 5xx samples with no corroborating traffic should be reported as insufficient workload evidence, not as healthy utilization. Record stable filesystem use as a capacity observation, but do not assume the raw metric value is a percentage without confirming its unit.
 
 ## Check 6: Certificates and alerts
