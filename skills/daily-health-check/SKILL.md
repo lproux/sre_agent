@@ -1,53 +1,100 @@
 # Daily Health Check Procedure
 
-Run this check daily (recommended: 9 AM UTC) to verify environment health proactively.
+Run this check daily to assess all monitored Azure resources. Use read-only evidence first; do not restart, scale, modify app settings, or generate synthetic traffic as part of this procedure.
 
-## Check 1: Application Health
+## Scope and Evidence Rules
 
-Call `CheckAppHealth` to verify all endpoints are responding.
+1. Enumerate enabled subscriptions before querying resources. Record every subscription that is inaccessible.
+2. Treat ARM `Running` or `Normal` as control-plane state only. It does not prove endpoint or application health.
+3. Do not report a zero error rate when the telemetry source has no recent rows. Check the latest ingested record before interpreting a 24-hour query.
+4. If the app is not reachable from the approved monitoring path (for example, public network access is disabled), do not bypass network controls with ad hoc probes. Report endpoint health as unknown unless an approved monitoring signal exists.
+5. Do not send a report unless both an approved recipient and a healthy mail connector are documented.
 
-Expected: All endpoints return 200, latency < 500ms.
+## Check 1: Resource Health and Inventory
 
-## Check 2: Resource Status
-
-Run Azure CLI:
-```
-az resource list --resource-group rg-sre-agent-demo --query "[].{name:name,type:type,provisioningState:provisioningState}" --output table
-```
-
-Expected: All resources show provisioningState=Succeeded.
-
-## Check 3: Alert Status
-
-```
-az monitor metrics alert list --resource-group rg-sre-agent-demo --query "[].{name:name,enabled:enabled,severity:severity}" --output table
+Discover enabled subscriptions:
+```sh
+az account list --query "[?state=='Enabled'].{name:name,id:id}" --output table
 ```
 
-Expected: All 3 alert rules enabled, none currently firing.
+For each subscription, query Azure Resource Health:
+```sh
+az graph query -q "HealthResources | extend availability=tostring(properties.availabilityState), summary=tostring(properties.summary), reason=tostring(properties.reasonType), occurred=todatetime(properties.occurredTime) | project id, name, type, availability, summary, reason, occurred | order by occurred desc" --first 100 --subscription <subscription-id> --output json
+```
 
-## Check 4: Quick Performance Baseline
+An empty result means no Resource Health events were returned; it is not proof that workloads are healthy. Also collect the resource inventory and alert-rule configuration for each monitored resource group.
 
-Run `AnalyzeResponseTimes` with num_requests=5 for a quick performance check.
+## Check 2: Application Health and Telemetry Freshness
 
-Compare against baselines:
-- /health: < 50ms
-- /api/status: < 100ms
-- /api/process: < 500ms
+Query the connected Application Insights resource for the last 24 hours:
+```kusto
+requests
+| where timestamp >= ago(24h)
+| summarize Requests=count(), Failed=countif(success == false), ServerErrors=countif(toint(resultCode) between (500 .. 599)), FailureRatePct=round(100.0 * countif(success == false) / count(), 2), Latest=max(timestamp)
+```
 
-## Check 5: Error Trends (Last 24h)
+Then query all-time freshness before interpreting the result:
+```kusto
+union requests, exceptions, traces
+| summarize Rows=count(), Oldest=min(timestamp), Latest=max(timestamp) by itemType
+| order by Latest desc
+```
 
-Use `ErrorRateByEndpoint` with timeRange=24h.
+Classify telemetry as **stale** when its newest record is more than 15 minutes old. A stale source makes request-error, exception, and latency status **unknown**, not healthy.
 
-Expected: 0% error rate across all endpoints.
+## Check 3: Log Analytics Errors and Warnings
+
+First confirm table freshness:
+```kusto
+union isfuzzy=true AppRequests, AppExceptions, AppTraces, AppPerformanceCounters, AppMetrics
+| summarize Rows=count(), Oldest=min(TimeGenerated), Latest=max(TimeGenerated) by Type
+| order by Latest desc
+```
+
+After confirming recent data exists, query errors from a table using columns that are present in that table. For example:
+```kusto
+AppTraces
+| where TimeGenerated >= ago(24h)
+| extend MessageText=tostring(Message)
+| where MessageText has_any ('error', 'fail', 'warn', 'degraded')
+| summarize Events=count(), Latest=max(TimeGenerated) by MessageText
+| top 20 by Events desc
+```
+
+Do not combine table-specific columns in a `union` query unless the schema has been verified.
+
+## Check 4: Certificates
+
+List Azure-managed App Service certificate resources:
+```sh
+az resource list --resource-type Microsoft.Web/certificates --subscription <subscription-id> --output json
+```
+
+Report certificates expiring within 30 days. If no managed certificate resource exists, record that external certificate management was not assessed; do not infer certificate expiry from HTTPS-only configuration.
+
+## Check 5: Capacity and Health Metrics
+
+Use a time grain supported by each metric. For this App Service, use five minutes for `HealthCheckStatus`, `CpuTime`, and `AverageMemoryWorkingSet`, and six hours for `FileSystemUsage`:
+```sh
+az monitor metrics list --resource <webapp-resource-id> --metric HealthCheckStatus --interval PT5M --aggregation Average --start-time <utc-start> --end-time <utc-end> --subscription <subscription-id>
+az monitor metrics list --resource <webapp-resource-id> --metric CpuTime AverageMemoryWorkingSet --interval PT5M --aggregation Average Maximum --start-time <utc-start> --end-time <utc-end> --subscription <subscription-id>
+az monitor metrics list --resource <webapp-resource-id> --metric FileSystemUsage --interval PT6H --aggregation Average --start-time <utc-start> --end-time <utc-end> --subscription <subscription-id>
+```
+
+`CpuTime` is consumed CPU seconds, not CPU percentage. A metric response with timestamps but no aggregates is missing data, not a passing value. `FileSystemUsage` is reported in bytes; compare it with a known quota before asserting a percentage or capacity risk.
+
+## Check 6: Report Delivery
+
+Before sending, confirm that the report recipient is explicitly documented and the configured Outlook connection is healthy. If either prerequisite is missing, generate the report in the execution response and mark delivery as **blocked**. Do not guess a recipient or attempt connector reauthentication.
 
 ## Report Format
 
-Summarize as:
-
-**Daily Health Check — [Date]**
-- Application: HEALTHY / DEGRADED / DOWN
-- Resources: ALL OK / [list issues]
-- Alerts: None firing / [list firing alerts]
-- Performance: Within baselines / [list deviations]
-- Error rate (24h): X%
-- Action required: None / [list actions]
+**Daily Health Check — [UTC date and window]**
+- Application runtime: HEALTHY / DEGRADED / DOWN / UNKNOWN
+- Telemetry freshness: current / stale, with latest timestamp
+- Resources: Resource Health events or no events returned
+- Alerts: enabled configuration and any known active conditions
+- Certificates: expirations within 30 days or scope limitation
+- Capacity: CPU, memory, storage, and missing-data caveats
+- Report delivery: sent / blocked, including the exact blocker
+- Action required: prioritized, concrete actions

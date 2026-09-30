@@ -11,7 +11,7 @@
 ### Compute
 | Resource | Type | SKU | Purpose |
 |----------|------|-----|---------|
-| plan-sre-demo | App Service Plan | Linux B1 (1 core, 1.75 GB) | Hosts the web app |
+| plan-sre-demo | App Service Plan | Linux Free F1, 1 worker | Hosts the web app |
 | app-sre-demo-* | App Service (Web App) | Node.js 20 LTS | Document processing API + dashboard |
 
 ### Monitoring & Observability
@@ -36,22 +36,22 @@
 | WEBSITE_NODE_DEFAULT_VERSION | ~20 | Node.js runtime version |
 
 ## Network Configuration
-- **Public access**: Enabled (demo environment)
+- **Public access**: Disabled on the App Service resource
 - **Custom domain**: None (uses *.azurewebsites.net)
-- **TLS**: Azure-managed certificate (HTTPS by default)
-- **IP restrictions**: None
-- **VNet integration**: None (demo environment)
+- **TLS**: HTTPS-only is enabled; both default hostname SSL bindings are disabled and no `Microsoft.Web/certificates` resource is currently present
+- **IP restrictions**: None recorded in the site configuration
+- **VNet integration**: None recorded in the site configuration
 
 ## Security Configuration
-- **SRE Agent permissions**: Reader (can investigate but not modify resources)
-- **Authentication**: None (demo app, public endpoints)
-- **Managed identity**: Not configured
+- **SRE Agent permissions**: Read access is available for resource and monitoring inspection; write operations require the appropriate authorization
+- **Authentication**: Endpoint reachability must be assessed through approved monitoring paths because public network access is disabled
+- **Managed identity**: System-assigned and user-assigned identities are configured for the SRE Agent
 
 ## Cost Estimate
-- App Service B1: ~$13/month
-- Application Insights: Pay-per-GB (~$2-5/month at demo traffic levels)
-- Log Analytics: Included with App Insights ingestion
-- **Total estimated**: ~$15-20/month
+- App Service plan: Free F1; no paid compute charge is expected for the plan
+- Application Insights: Consumption depends on current ingestion and retention configuration
+- Log Analytics: Consumption depends on current ingestion and retention configuration
+- **Total estimated**: Not maintained here; use current Azure pricing and resource usage for a cost assessment
 
 ## Differences from Production
 This is a demo environment. A production deployment would additionally include:
