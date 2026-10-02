@@ -74,6 +74,8 @@ Report certificates expiring within 30 days. If no managed certificate resource 
 
 ## Check 5: Capacity and Health Metrics
 
+Before interpreting `HealthCheckStatus`, retrieve the site configuration and verify that `healthCheckPath` is nonempty. If no path is configured, classify the health-check metric and any alert based on it as unavailable coverage; do not infer endpoint health from an empty metric.
+
 Use a time grain supported by each metric. For this App Service, use five minutes for `HealthCheckStatus`, `CpuTime`, and `AverageMemoryWorkingSet`, and six hours for `FileSystemUsage`:
 ```sh
 az monitor metrics list --resource <webapp-resource-id> --metric HealthCheckStatus --interval PT5M --aggregation Average --start-time <utc-start> --end-time <utc-end> --subscription <subscription-id>
