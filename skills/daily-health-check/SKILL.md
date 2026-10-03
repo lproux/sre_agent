@@ -5,10 +5,11 @@ Run this check daily to assess all monitored Azure resources. Use read-only evid
 ## Scope and Evidence Rules
 
 1. Enumerate enabled subscriptions before querying resources. Record every subscription that is inaccessible.
-2. Treat ARM `Running` or `Normal` as control-plane state only. It does not prove endpoint or application health.
-3. Do not report a zero error rate when the telemetry source has no recent rows. Check the latest ingested record before interpreting a 24-hour query.
-4. If the app is not reachable from the approved monitoring path (for example, public network access is disabled), do not bypass network controls with ad hoc probes. Report endpoint health as unknown unless an approved monitoring signal exists.
-5. Do not send a report unless both an approved recipient and a healthy mail connector are documented.
+2. If subscription discovery cannot authenticate, do not retry it through another identity or imply complete coverage. Report subscription inventory, Resource Health, and certificate discovery as unavailable, then limit findings to resources that can be directly inspected.
+3. Treat ARM `Running` or `Normal` as control-plane state only. It does not prove endpoint or application health.
+4. Do not report a zero error rate when the telemetry source has no recent rows. Check the latest ingested record before interpreting a 24-hour query.
+5. If the app is not reachable from the approved monitoring path (for example, public network access is disabled), do not bypass network controls with ad hoc probes. Report endpoint health as unknown unless an approved monitoring signal exists.
+6. Do not send a report unless both an approved recipient and a healthy mail connector are documented.
 
 ## Check 1: Resource Health and Inventory
 
